@@ -26,6 +26,6 @@ jobs:
           key: app_docker
 
       - name: Run rspec test
-        run: docker-compose run test /bin/sh -c "rspec"
+        run: docker-compose run test /bin/sh -c "bundle install && rspec"
       - name: Check codestyle
         run: docker-compose run test /bin/sh -c "rubocop"
