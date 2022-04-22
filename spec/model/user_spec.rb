@@ -2,6 +2,22 @@
 
 require 'rails_helper'
 describe User, type: :mode do
+  describe 'when validating when configured as: "required: true"' do
+    it 'fails if photo_tmp and photo does not exist' do
+      user = build(:user, photo_tmp: nil, photo: nil)
+      expect(user.valid?).to be_falsey
+    end
+
+    it 'passes if photo_tmp exist and photo does not exist' do
+      user = build(:user, :with_photo_tmp, photo: nil)
+      expect(user.valid?).to be_truthy
+    end
+
+    it 'passes if photo exist and photo_tmp does not exist' do
+      user = build(:user, :with_photo, photo_tmp: nil)
+      expect(user.valid?).to be_truthy
+    end
+  end
 
   describe 'when uploading photo' do
     it 'uses :default variant for the original image' do

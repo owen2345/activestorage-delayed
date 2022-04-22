@@ -3,3 +3,13 @@ Style/Documentation:
 
 Gemspec/RequiredRubyVersion:
   Enabled: false
+
+AllCops:
+  Exclude:
+    - spec/dummy/**/*
+
+
+Metrics/BlockLength:
+  Exclude:
+    - spec/**/*
+    - db/migrate/*

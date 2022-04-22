@@ -1,6 +1,8 @@
-require_relative "boot"
+# frozen_string_literal: true
 
-require "rails/all"
+require_relative 'boot'
+
+require 'rails/all'
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -18,7 +20,7 @@ module Dummy
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
-    config.factory_bot.definition_file_paths = ["/app/spec/factories"]
-    config.active_job.queue_adapter     = :test
+    config.factory_bot.definition_file_paths = ['/app/spec/factories']
+    config.active_job.queue_adapter = :test
   end
 end

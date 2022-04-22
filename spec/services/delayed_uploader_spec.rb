@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-include ActiveJob::TestHelper
 describe ActivestorageDelayed::DelayedUploader do
-
+  include ActiveJob::TestHelper
   describe 'when has_one_attached' do
     let(:user) { create(:user, :with_photo_tmp) }
     let!(:delayed_upload) { user.photo_delayed_uploads.last }
@@ -16,13 +15,23 @@ describe ActivestorageDelayed::DelayedUploader do
         inst.call
       end
 
-      it 'fetches the corresponding filename from the model' do
-        expect(user).to receive(:ast_delayed_filename).with(:photo, anything).and_call_original
+      it 'calculates filename if configured as: "use_filename: true"' do
+        expect(inst).to receive(:filename_for)
+        inst.call
+      end
+
+      it 'fetches the corresponding filename from the model if defined when defined: "use_filename: true"' do
+        user.instance_eval do
+          def photo_filename(filename)
+            filename
+          end
+        end
+        expect(user).to receive(:photo_filename).and_call_original
         inst.call
       end
 
       it 'uploads the file to the storage' do
-        expect(user.photo).to receive(:attach).with(hash_including(:filename, :io, :key))
+        expect(user.photo).to receive(:attach).with(hash_including(:filename, :io, :key, :content_type))
         inst.call
       end
 
@@ -65,7 +74,7 @@ describe ActivestorageDelayed::DelayedUploader do
       it 'uploads the files to the storage' do
         files = 2.times.map { FixtureHelpers.as_uploadable_file('baloon.jpg') }
         user.update!(certificates_tmp: { files: files })
-        expect(user.certificates).to receive(:attach).with(hash_including(:filename, :io, :key)).twice
+        expect(user.certificates).to receive(:attach).with(hash_including(:filename, :io, :content_type)).twice
         inst.call
       end
     end

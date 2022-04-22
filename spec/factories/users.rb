@@ -20,6 +20,7 @@ require_relative '../support/fixture_helpers'
 FactoryBot.define do
   factory :user do
     sequence(:name) { |i| "Sample name #{i}" }
+    photo { FixtureHelpers.as_file_storage('baloon.jpg') }
 
     transient do
       qty_certs { 2 }
@@ -30,6 +31,7 @@ FactoryBot.define do
     end
 
     trait :with_photo_tmp do
+      photo { nil }
       photo_tmp { FixtureHelpers.as_uploadable_file('baloon.jpg') }
     end
 

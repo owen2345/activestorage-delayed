@@ -7,15 +7,15 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 gemspec
 
 group :development, :test do
-  gem 'factory_bot_rails'
-  gem 'database_cleaner-active_record'
-  gem 'capybara'
-  gem 'rails'
-  gem 'sqlite3'
-  gem 'rspec-rails', '~> 5.0.0'
-  gem 'puma'
-  gem 'rubocop'
   gem 'byebug'
+  gem 'capybara'
+  gem 'database_cleaner-active_record'
+  gem 'factory_bot_rails'
+  gem 'puma'
+  gem 'rails'
+  gem 'rspec-rails', '~> 5.0.0'
+  gem 'rubocop'
+  gem 'sqlite3'
 end
 
 # Start debugger with binding.b [https://github.com/ruby/debug]

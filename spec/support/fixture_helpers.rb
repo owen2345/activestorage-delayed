@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module FixtureHelpers
   def self.as_file_storage(fixture_name)
     {
@@ -5,7 +7,7 @@ module FixtureHelpers
       filename: File.basename(fixture_name)
     }
   end
-  
+
   def self.as_uploadable_file(name)
     Rack::Test::UploadedFile.new("/app/spec/fixtures/#{name}", 'image/png')
   end

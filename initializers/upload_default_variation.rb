@@ -11,7 +11,7 @@ module ActivetoragePreprocessDefaultVariation
     default_variant = variant ? variant[:default] : nil
     if default_variant && self.class.enabled_default_variant?
       ActiveStorage::Variation.wrap(default_variant).transform(io) do |output|
-        unfurl output, identify: identify # rubocop:disable Style/HashSyntax
+        unfurl output, identify: identify
         super(output)
       end
     else

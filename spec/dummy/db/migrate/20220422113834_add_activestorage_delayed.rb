@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AddActivestorageDelayed < ActiveRecord::Migration[6.1]
   def change
     create_table :activestorage_delayed_uploads do |t|
