@@ -89,18 +89,5 @@ module ActivestorageDelayed
     def attr_settings
       model.class.instance_variable_get(:@ast_delayed_settings)[attr_name]
     end
-
-    # TODO: support other services
-    # def ast_rename_existent_file(attr_name)
-    #   file = send(attr_name)
-    #   if file.service.name == :amazon
-    #     obj = file.service.send(:object_for, file.blob.key)
-    #     obj.move_to(bucket: obj.bucket.name, key: ast_delayed_filename(attr_name))
-    #   elsif file.service.name == :local
-    #     old_path = file.service.path_for(file.blob.key)
-    #     new_path = file.service.path_for(ast_delayed_filename(attr_name))
-    #     FileUtils.mv(old_path, new_path)
-    #   end
-    # end
   end
 end

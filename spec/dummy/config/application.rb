@@ -7,7 +7,7 @@ require 'rails/all'
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
-require 'activestorage-delayed'
+require 'activestorage_delayed'
 
 module Dummy
   class Application < Rails::Application
