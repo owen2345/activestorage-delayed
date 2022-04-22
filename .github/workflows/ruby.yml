@@ -23,7 +23,7 @@ jobs:
       - uses: satackey/action-docker-layer-caching@v0.0.11 # Cache or restore docker cache
         continue-on-error: true # Ignore the failure of a step and avoid terminating the job.
         with:
-          key: app_docker
+          key: app-cache-${{ hashFiles('Dockerfile') }}
 
       - name: Run rspec test
         run: docker-compose run test /bin/sh -c "bundle install && rspec"
