@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   spec.metadata['source_code_uri'] = spec.homepage
   spec.metadata['changelog_uri'] = spec.homepage
 
-  spec.files = Dir.chdir(File.expand_path('..', __FILE__)) do
+  spec.files = Dir.chdir(File.expand_path('..', __FILE__)) do # rubocop:disable Style/ExpandPathArguments
     `git ls-files -z`.split("\x0").reject do |f|
       f.match(%r{^(test|spec|features)/})
     end

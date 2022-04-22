@@ -9,6 +9,10 @@ AllCops:
     - spec/dummy/**/*
 
 
+Naming/FileName:
+  Exclude:
+    - lib/activestorage-delayed.rb
+
 Metrics/BlockLength:
   Exclude:
     - spec/**/*
