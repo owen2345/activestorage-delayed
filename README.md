@@ -47,20 +47,21 @@ end
 ### Examples to upload files in background 
 - Upload a single file
   ```ruby
-    User.create(photo_tmp: File.open('my_file.png'))
+    User.create(photo_tmp: File.open('my_file.png')) # uploads the file in background
+    User.create(photo: File.open('my_file.png')) # uploads the file directly
   ```
   **HTML**:
   ```haml
   f.file_field :photo_tmp
   ```
 
-- loads multiple files
+- Upload multiple files
   ```ruby
     User.create(certificates_tmp: [File.open('my_file.png'), File.open('my_file.png')])
   ```    
    **HTML**:
   ```haml
-  = f.file_field :certificates_tmp, multiple: true`
+  = f.file_field :certificates_tmp, multiple: true
   ```
 
 - Deletes first 2 certificates and uploads a new one
@@ -91,7 +92,7 @@ end
   end
   ```
   When `<attr_name>_filename` is defined, then it is called to fetch the uploaded file name.    
-  Check [this](https://gist.github.com/owen2345/33730a452d73b6b292326bb602b0ee6b) to rename/update remote file-name
+  Note: Check [this](https://gist.github.com/owen2345/33730a452d73b6b292326bb602b0ee6b) if you want to rename an already uploaded file (remote file)
 
 - Capture event when file upload has failed
   ```ruby
@@ -126,7 +127,7 @@ class User < ApplicationRecord
   end
 end
 ```
-`default` variant will be used to pre-preprocess the original file before uploading (if defined). By this way you have your desired image size and quality as the original image.
+`:default` variant will be used to pre-preprocess the original file before uploading (if defined). By this way you have your desired image size and quality as the original image.
 
 
 
