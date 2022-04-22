@@ -3,6 +3,8 @@ version: '2'
 services:
   test:
     build: .
+    environment:
+      RAILS_ENV: test
     command: sh -c 'bundle exec rspec'
     volumes:
       - .:/app

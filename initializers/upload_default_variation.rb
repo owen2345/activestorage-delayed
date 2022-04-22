@@ -7,7 +7,7 @@ module ActivetoragePreprocessDefaultVariation
   end
 
   def upload_without_unfurling(io)
-    variant = attachments.first.try(:variants)
+    variant = attachments.first.try(:send, :variants)
     default_variant = variant ? variant[:default] : nil
     if default_variant && self.class.enabled_default_variant?
       ActiveStorage::Variation.wrap(default_variant).transform(io) do |output|

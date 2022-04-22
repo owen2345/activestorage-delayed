@@ -1,4 +1,4 @@
-FROM ruby:2.5
+FROM ruby:2.7
 RUN apt-get update -qq
 RUN gem install bundler
 WORKDIR /app

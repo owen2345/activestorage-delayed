@@ -22,7 +22,7 @@ describe User, type: :mode do
   describe 'when uploading photo' do
     it 'uses :default variant for the original image' do
       allow(ActiveStorage::Blob).to receive(:enabled_default_variant?).and_return(true)
-      allow(ActiveStorage::Variation).to receive(:wrap).and_call_original
+      allow(ActiveStorage::Variation).to receive(:wrap).and_return(double(transform: true))
       create(:user, :with_photo)
       exp_args = hash_including(resize_to_fill: [200, 200])
       supported_rails = Rails.version[0].to_i >= 7
