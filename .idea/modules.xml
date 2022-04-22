@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/hotreload.iml" filepath="$PROJECT_DIR$/.idea/hotreload.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/activestorage-delayed.iml" filepath="$PROJECT_DIR$/.idea/activestorage-delayed.iml" />
     </modules>
   </component>
 </project>

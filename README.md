@@ -1,36 +1,44 @@
-# RailsHotreload
+# Activestorage Delayed
 
-This gem adds hot reloading feature to Rails applications that contains hotwire. The application is automatically reloaded when:
-- Any file has changed (added, updated or deleted) in `app/assets/builds`
-- Any app view has changed (added, updated or deleted) in `app/views`
 
-## Dependencies
-- This Gem depends on (turbo-rails)[https://github.com/hotwired/turbo-rails] to automatically stream reload message when file changes were detected
-- This Gem depends on (listen)[https://github.com/guard/listen] to detect file changes
 
 ## Installation
 - Add this line to your application's Gemfile:
 ```ruby
 group :development do
-  gem "rails_hotreload"
+  gem "activestorage-delayed"
 end
 ```
 - And then execute:
-```bash
-$ bundle install
-```
-- Include this template in your layout
-```ruby
-= render '/rails_hotreload/stream' if Rails.env.development?
-```
+    ```bash
+    $ bundle install
+    ```
+- Generate the migration:
+    ```bash
+    rails g migration add_activestorage_delayed
+    ```
+- Add the following content to the migration file:
+    ```ruby
+      def change
+        create_table :activestorage_delayed_uploads do |t|
+          t.references :uploadable, polymorphic: true, null: false
+          t.string :attr_name, null: false
+          t.string :deleted_ids, default: ''
+          t.boolean :clean_before, default: false
+          t.text :files
+    
+          t.timestamps
+        end
+      end
+    ```
 
 - Start the file watcher (Rake task)
 ```
-bin/rails rails_hotreload:start
+bin/rails activestorage-delayed:start
 ```
 Note: If your project is using Procfile.dev (Foreman), then you can add:
 ```
-rails_hotreload: bin/rails rails_hotreload:start
+activestorage-delayed: bin/rails activestorage-delayed:start
 ```
 - Start your rails application and try editing your views or stylesheets or js files to see immediate changes in your browser
 
@@ -38,11 +46,11 @@ rails_hotreload: bin/rails rails_hotreload:start
 - Make sure your Turbo settings are well configured. See https://github.com/hotwired/turbo-rails#installation (Specially #4)
 - This gem by default is watching changes in: `app/assets/builds,app/views/`. This can be customized as the following: 
 ```
-bin/rails rails_hotreload:start app/javascripts,app/stylesheets,app/views/
+bin/rails activestorage-delayed:start app/javascripts,app/stylesheets,app/views/
 ```
 - The hot reloader UI can be customized as the following:
 ```
-= render '/rails_hotreload/stream', custom_style: 'left: 20px; bottom: 20px;'
+= render '/activestorage-delayed/stream', custom_style: 'left: 20px; bottom: 20px;'
 ```
 
 ## Contributing
