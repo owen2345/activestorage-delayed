@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+lib = File.expand_path('lib', __dir__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require_relative 'lib/activestorage-delayed/version'
 
 Gem::Specification.new do |spec|
@@ -17,9 +19,12 @@ Gem::Specification.new do |spec|
   spec.metadata['source_code_uri'] = spec.homepage
   spec.metadata['changelog_uri'] = spec.homepage
 
-  spec.files = Dir.chdir(File.expand_path(__dir__)) do
-    Dir['{lib}/**/*', 'MIT-LICENSE', 'Rakefile', 'README.md']
+  spec.files = Dir.chdir(File.expand_path('..', __FILE__)) do
+    `git ls-files -z`.split("\x0").reject do |f|
+      f.match(%r{^(test|spec|features)/})
+    end
   end
+  spec.require_paths = %w[lib]
 
   spec.add_dependency 'activestorage'
   spec.add_dependency 'rails'
