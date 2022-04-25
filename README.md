@@ -7,7 +7,7 @@ This is a Ruby on Rails gem to upload activestorage files in background by savin
 - Upload files in background
 - Ability to add new files instead of replacing the old ones when using using `has_many_attached`
 - Ability to upload files with the original filename or a custom one
-- Ability to preprocess the files before uploading them (Rails 7+)
+- Ability to preprocess the files before uploading them (Rails 7+)     
 Note: This gem assumes that the app has already configured activestorage.
 
 ## Installation
