@@ -6,7 +6,7 @@ This is a Ruby on Rails gem to upload activestorage files in background by savin
 ## Installation
 - Add this line to your application's Gemfile:
   ```ruby
-    gem 'activestorage-delayed'
+    gem 'activestorage-delayed', '>= 0.1.1'
   ```
 - And then execute: `bundle install`
 - Generate the migration: `rails g migration add_activestorage_delayed`
