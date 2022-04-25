@@ -1,7 +1,13 @@
 # Activestorage Delayed
 
-ActiveStorage for Rails 6 and 7 does not support to upload files in background which in most cases delays the submit process and then making the visitor get bored or receive a timeout error.    
-This is a Ruby on Rails gem to upload activestorage files in background by saving them as base64 encoded in the database and be processed later.
+ActiveStorage in Rails 6 and 7 does not support to upload files in background which in most cases delays the submit process and then makes the visitor get bored or receive a timeout error.        
+This is a Ruby on Rails gem to upload activestorage files in background by saving them as base64 encoded in the database (important for apps hosted in kubernetes) and be processed later.    
+
+## Features
+- Upload files in background
+- Ability to add new files instead of replacing the old ones when using using `has_many_attached`
+- Ability to upload files with the original filename or a custom one
+- Ability to preprocess the files before uploading them (Rails 7+)
 
 ## Installation
 - Add this line to your application's Gemfile:
