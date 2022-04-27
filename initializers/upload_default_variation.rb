@@ -6,12 +6,13 @@ module ActivetoragePreprocessDefaultVariation
     base.extend(ClassMethods)
   end
 
-  def upload_without_unfurling(io)
+  def upload_without_unfurling(io) # rubocop:disable Metrics/MethodLength
     variant = attachments.first.try(:send, :variants)
     default_variant = variant ? variant[:default] : nil
     if default_variant && self.class.enabled_default_variant?
       ActiveStorage::Variation.wrap(default_variant).transform(io) do |output|
         unfurl output, identify: identify
+        save! if id.present? # update new unfurl information
         super(output)
       end
     else
