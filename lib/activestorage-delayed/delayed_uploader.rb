@@ -13,8 +13,7 @@ module ActivestorageDelayed
       return unless delayed_upload
 
       remove_files
-      upload_photos
-      save_changes
+      save_changes if upload_photos
     end
 
     private
@@ -25,9 +24,11 @@ module ActivestorageDelayed
       tmp_files_data.each do |file_data|
         model.send(attr_name).attach(file_data.transform_keys(&:to_sym))
       end
+      true
     rescue => e # rubocop:disable Style/RescueStandardError
       Rails.logger.error("********* #{self.class.name} -> Failed uploading files: #{e.message}. #{e.backtrace[0..20]}")
       model.ast_delayed_on_error(attr_name, e)
+      false
     end
 
     def save_changes
