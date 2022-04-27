@@ -13,7 +13,7 @@ Note: This gem assumes that the app has already configured activestorage.
 ## Installation
 - Add this line to your application's Gemfile:
   ```ruby
-    gem 'activestorage-delayed', '>= 0.1.1'
+    gem 'activestorage-delayed', '>= 0.1.2'
   ```
 - And then execute: `bundle install`
 - Generate the migration: `rails g migration add_activestorage_delayed`
