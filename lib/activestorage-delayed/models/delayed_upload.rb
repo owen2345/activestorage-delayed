@@ -10,7 +10,7 @@ module ActivestorageDelayed
     self.table_name = 'activestorage_delayed_uploads'
     attr_accessor :tmp_files
 
-    belongs_to :uploadable, polymorphic: true
+    belongs_to :uploadable, polymorphic: true, touch: true
 
     before_save :parse_tmp_files
     after_create_commit do
