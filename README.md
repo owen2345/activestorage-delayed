@@ -39,7 +39,7 @@ Note: This gem assumes that the app has already configured activestorage.
   class User < ApplicationRecord
   include ActivestorageDelayed::DelayedConcern
 
-  has_one_attached :photo, require: true, use_filename: true
+  has_one_attached :photo, required: true, use_filename: true
   delayed_attach :photo
 
   has_many_attached :certificates
@@ -48,7 +48,7 @@ end
 
 ```
 ### `delayed_attach` accepts an optional hash with the following options:
-- `require`: If set to `true`, the `photo` or the `photo_tmp` will be required before saving.
+- `required`: If set to `true`, the `photo` or the `photo_tmp` will be required before saving.
 - `use_filename`: If set to `true`, the image filename will be used as the name of uploaded file instead of the hash-key used by `activestorage`
 
 ### Examples to upload files in background 
