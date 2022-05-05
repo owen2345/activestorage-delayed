@@ -39,7 +39,7 @@ Note: This gem assumes that the app has already configured activestorage.
   class User < ApplicationRecord
   include ActivestorageDelayed::DelayedConcern
 
-  has_one_attached :photo, required: true, use_filename: true
+  has_one_attached :photo, required: true, use_filename: true, variant_info: { resize_to_fit: [400, 400], convert: 'jpg' }
   delayed_attach :photo
 
   has_many_attached :certificates
@@ -50,6 +50,7 @@ end
 ### `delayed_attach` accepts an optional hash with the following options:
 - `required`: If set to `true`, the `photo` or the `photo_tmp` will be required before saving.
 - `use_filename`: If set to `true`, the image filename will be used as the name of uploaded file instead of the hash-key used by `activestorage`
+- `variant_info`: (Hash) Variant information to be performed before uploading the file.
 
 ### Examples to upload files in background 
 - Upload a single file
@@ -90,7 +91,7 @@ end
     User.first.update(certificates_tmp: { clean_before: true, files: [File.open('my_file.png')] })
   ```
   
-- Upload files with custom names (requires `use_filename: true`)
+- Upload files with custom names (requires `use_filename: true`): `<attr_name>_filename`
   ```ruby
   class User < ApplicationRecord
     def photo_filename(filename)
@@ -101,42 +102,27 @@ end
   When `<attr_name>_filename` is defined, then it is called to fetch the uploaded file name.    
   Note: Check [this](https://gist.github.com/owen2345/33730a452d73b6b292326bb602b0ee6b) if you want to rename an already uploaded file (remote file)
 
-- Capture event when file upload has failed
+- Capture event when file upload has failed: `<attr_name>_error_upload`
   ```ruby
     class User < ApplicationRecord
-      def ast_delayed_on_error(attr_name, error)
-        puts "Failed #{attr_name} with #{error}"
+      def photo_error_upload(error)
+        puts "Failed with #{error}"
       end
     end
   ```
 
-- Capture event when file has been uploaded
+- Capture event when file has been uploaded: `<attr_name>_after_upload`
   ```ruby
     class User < ApplicationRecord
-      after_save_commit do
-        puts 'Photo has been uploaded' if photo.blob.present?
-        puts 'No pending enqueued photo uploads' unless photo_delayed_uploads.any?
-      end
-      
-      before_save do 
-        puts "current assigned tmp photo: #{photo_tmp.inspect}"
+      def photo_after_upload
+        puts "Photo has been uploaded"
       end
     end
   ```
+
+Note:       
   `<attr_name>_delayed_uploads` is a `has_many` association that contains the list of scheduled uploads for the corresponding attribute.
   
-  
-## Preprocessing original files before uploading (Rails 7+)
-```ruby
-class User < ApplicationRecord
-  has_one_attached :photo do |attachable|
-    attachable.variant :default, strip: true, quality: 70, resize_to_fill: [200, 200]
-  end
-end
-```
-`:default` variant will be used to pre-preprocess the original file before uploading (if defined). By this way you have your desired image size and quality as the original image.
-
-
 
 ## Contributing
 Bug reports and pull requests are welcome on https://github.com/owen2345/activestorage-delayed. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.    
