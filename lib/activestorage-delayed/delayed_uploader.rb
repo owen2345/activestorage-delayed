@@ -24,10 +24,12 @@ module ActivestorageDelayed
       tmp_files_data.each do |file_data|
         model.send(attr_name).attach(file_data.transform_keys(&:to_sym))
       end
+      model.send("#{attr_name}_after_upload")
       true
     rescue => e # rubocop:disable Style/RescueStandardError
       Rails.logger.error("********* #{self.class.name} -> Failed uploading files: #{e.message}. #{e.backtrace[0..20]}")
-      model.ast_delayed_on_error(attr_name, e)
+      puts "!!!!!!!!#{"********* #{self.class.name} -> Failed uploading files: #{e.message}. #{e.backtrace[0..20]}"}"
+      model.send("#{attr_name}_error_upload", e)
       false
     end
 
@@ -51,11 +53,8 @@ module ActivestorageDelayed
     end
 
     def base64_to_file(file_data)
-      tempfile = Tempfile.new(file_data['filename'])
-      tempfile.binmode
-      tempfile.write Base64.decode64(file_data['io'])
-      tempfile.rewind
-      tempfile
+      io = StringIO.new(Base64.decode64(file_data['io']))
+      apply_variant(io, attr_settings[:variant_info]) { |io2| return io2 }
     end
 
     def model
@@ -64,11 +63,7 @@ module ActivestorageDelayed
 
     def filename_for(filename)
       method_name = "#{attr_name}_filename".to_sym
-      return model.send(method_name, filename) if model.respond_to?(method_name)
-
-      name = File.basename(filename, '.*').parameterize
-      name = "#{SecureRandom.uuid}-#{name}" if support_multiple?
-      "#{model.id}-#{name}#{File.extname(filename)}"
+      model.send(method_name, filename)
     end
 
     def remove_files
@@ -89,6 +84,14 @@ module ActivestorageDelayed
 
     def attr_settings
       model.class.instance_variable_get(:@ast_delayed_settings)[attr_name]
+    end
+
+    # @param io [StringIO, File]
+    # @param variant_info [Hash, Nil] ActiveStorage variant info. Sample: { resize_to_fit: [400, 400], convert: 'jpg' }
+    def apply_variant(io, variant_info, &block)
+      return block.call(io) unless variant_info
+
+      ActiveStorage::Variation.wrap(variant_info).transform(io, &block)
     end
   end
 end

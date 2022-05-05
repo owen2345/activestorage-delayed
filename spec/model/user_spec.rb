@@ -19,22 +19,6 @@ describe User, type: :mode do
     end
   end
 
-  describe 'when uploading photo' do
-    it 'uses :default variant for the original image' do
-      allow(ActiveStorage::Blob).to receive(:enabled_default_variant?).and_return(true)
-      allow(ActiveStorage::Variation).to receive(:wrap).and_return(double(transform: true))
-      create(:user, :with_photo)
-      exp_args = hash_including(resize_to_fill: [200, 200])
-      supported_rails = Rails.version[0].to_i >= 7
-      expect(ActiveStorage::Variation).to have_received(:wrap).with(exp_args) if supported_rails
-    end
-
-    it 'does not preprocess default variant if not defined' do
-      expect(ActiveStorage::Variation).not_to receive(:wrap)
-      create(:user, :with_certificates)
-    end
-  end
-
   describe 'when uploading via background job' do
     let(:user) { create(:user, :with_photo_tmp) }
 

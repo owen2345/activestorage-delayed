@@ -5,8 +5,9 @@ module ActivestorageDelayed
     extend ActiveSupport::Concern
     included do
       @ast_delayed_settings = {}
-      def self.delayed_attach(attr_name, required: false, use_filename: false) # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
-        @ast_delayed_settings[attr_name] = { use_filename: use_filename }
+      def self.delayed_attach(attr_name, required: false, use_filename: false,
+                              variant_info: nil) # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
+        @ast_delayed_settings[attr_name] = { use_filename: use_filename, variant_info: variant_info }
         tmp_attr_name = :"#{attr_name}_tmp"
         has_many_attr = :"#{attr_name}_delayed_uploads"
         attr_accessor tmp_attr_name
@@ -27,11 +28,22 @@ module ActivestorageDelayed
           delayed_data[:attr_name] = attr_name
           send(has_many_attr) << send(has_many_attr).new(delayed_data)
         end
+
+        # @param filename (String) File name
+        define_method "#{attr_name}_filename" do |filename|
+          name = File.basename(filename, '.*').parameterize
+          is_multiple = send(attr_name).class.name.include?('Many')
+          name = "#{SecureRandom.uuid}-#{name}" if is_multiple
+          "#{send(:id)}-#{name}#{File.extname(filename)}"
+        end
+
+        define_method "#{attr_name}_after_upload" do
+        end
+
+        # @param _error (Exception)
+        define_method "#{attr_name}_error_upload" do |_error|
+        end
       end
     end
-
-    # @param _attr_name (String)
-    # @param _error (Exception)
-    def ast_delayed_on_error(_attr_name, _error); end
   end
 end

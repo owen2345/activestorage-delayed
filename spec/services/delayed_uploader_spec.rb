@@ -3,6 +3,12 @@
 require 'rails_helper'
 describe ActivestorageDelayed::DelayedUploader do
   include ActiveJob::TestHelper
+  before do
+    mock_variation = double(transform: nil)
+    allow(ActiveStorage::Variation).to receive(:wrap).and_return(mock_variation)
+    allow(mock_variation).to receive(:transform) { |io, &block| block.call(io) }
+  end
+
   describe 'when has_one_attached' do
     let(:user) { create(:user, :with_photo_tmp) }
     let!(:delayed_upload) { user.photo_delayed_uploads.last }
@@ -23,10 +29,10 @@ describe ActivestorageDelayed::DelayedUploader do
       it 'fetches the corresponding filename from the model if defined when defined: "use_filename: true"' do
         user.instance_eval do
           def photo_filename(filename)
-            filename
+            "custom_#{filename}"
           end
         end
-        expect(user).to receive(:photo_filename).and_call_original
+        expect(user.photo).to receive(:attach).with(hash_including(filename: include('custom_')))
         inst.call
       end
 
@@ -40,11 +46,31 @@ describe ActivestorageDelayed::DelayedUploader do
         expect { delayed_upload.reload }.to raise_error(ActiveRecord::RecordNotFound)
       end
 
-      it 'calls model#ast_delayed_on_error when failed' do
+      it 'calls model#<attr>_after_upload method once failed' do
         error = 'some error'
         allow(user.photo).to receive(:attach).and_raise(error)
-        expect(user).to receive(:ast_delayed_on_error).with(:photo, anything)
+        expect(user).to receive(:photo_error_upload).with(be_a(Exception))
         inst.call
+      end
+
+      it 'calls model#<attr>_after_upload method once uploaded' do
+        expect(user).to receive(:photo_after_upload)
+        inst.call
+      end
+
+      describe 'when applying variant transformations to the file to be uploaded' do
+        it 'applies variant transformation if defined' do
+          variant_info = { resize_to_fit: [400, 400], convert: 'jpg' }
+          allow(inst).to receive(:attr_settings).and_return(variant_info: variant_info)
+          expect(ActiveStorage::Variation).to receive(:wrap).with(variant_info)
+          inst.call
+        end
+
+        it 'does not apply variant transformation if not defined' do
+          allow(inst).to receive(:attr_settings).and_return(variant_info: nil)
+          expect(ActiveStorage::Variation).not_to receive(:wrap)
+          inst.call
+        end
       end
     end
   end
