@@ -59,5 +59,10 @@ describe User, type: :mode do
       last_delayed_upload = user.photo_delayed_uploads.last
       expect(last_delayed_upload.deleted_ids.split(',').map(&:to_i)).to eq(ids)
     end
+
+    it 'saves the provided variant_info to be used later' do
+      settings = described_class.instance_variable_get(:@ast_delayed_settings)[:photo]
+      expect(settings[:variant_info]).to eq({ resize_to_fill: [200, 200] })
+    end
   end
 end
