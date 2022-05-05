@@ -28,7 +28,6 @@ module ActivestorageDelayed
       true
     rescue => e # rubocop:disable Style/RescueStandardError
       Rails.logger.error("********* #{self.class.name} -> Failed uploading files: #{e.message}. #{e.backtrace[0..20]}")
-      puts "!!!!!!!!#{"********* #{self.class.name} -> Failed uploading files: #{e.message}. #{e.backtrace[0..20]}"}"
       model.send("#{attr_name}_error_upload", e)
       false
     end

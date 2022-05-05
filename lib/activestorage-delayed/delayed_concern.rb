@@ -3,11 +3,14 @@
 module ActivestorageDelayed
   module DelayedConcern
     extend ActiveSupport::Concern
-    included do
+    included do # rubocop:disable Metrics/BlockLength
       @ast_delayed_settings = {}
-      def self.delayed_attach(attr_name, required: false, use_filename: false,
-                              variant_info: nil) # rubocop:disable Metrics/AbcSize,Metrics/MethodLength
-        @ast_delayed_settings[attr_name] = { use_filename: use_filename, variant_info: variant_info }
+
+      # @param settings (Hash)
+      #   use_filename: (Boolean)
+      #   variant_info: (Hash) Sample: { resize_to_fit: [400, 400], convert: 'jpg' }
+      def self.delayed_attach(attr_name, required: false, **settings) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+        @ast_delayed_settings[attr_name] = settings
         tmp_attr_name = :"#{attr_name}_tmp"
         has_many_attr = :"#{attr_name}_delayed_uploads"
         attr_accessor tmp_attr_name
