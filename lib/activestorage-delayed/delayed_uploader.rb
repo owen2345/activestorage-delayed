@@ -18,18 +18,25 @@ module ActivestorageDelayed
 
     private
 
-    # TODO: check the ability to delete io with save or upload method
-    # file_data['io'].close
-    def upload_photos # rubocop:disable Metrics/AbcSize
-      tmp_files_data.each do |file_data|
-        model.send(attr_name).attach(file_data.transform_keys(&:to_sym))
-      end
+    def upload_photos
+      tmp_files_data.each(&method(:upload_photo))
       model.send("#{attr_name}_after_upload")
       true
     rescue => e # rubocop:disable Style/RescueStandardError
-      Rails.logger.error("********* #{self.class.name} -> Failed uploading files: #{e.message}. #{e.backtrace[0..20]}")
-      model.send("#{attr_name}_error_upload", e)
+      print_failure(e)
       false
+    end
+
+    def upload_photo(file_data)
+      parse_file_io(file_data) do |io|
+        file_data['io'] = io
+        model.send(attr_name).attach(file_data.transform_keys(&:to_sym))
+      end
+    end
+
+    def print_failure(error)
+      Rails.logger.error("***#{self.class.name} -> Failed uploading files: #{error.message}. #{error.backtrace[0..20]}")
+      model.send("#{attr_name}_error_upload", error)
     end
 
     def save_changes
@@ -42,7 +49,6 @@ module ActivestorageDelayed
       @tmp_files_data ||= begin
         files = JSON.parse(delayed_upload.files || '[]')
         files.each do |file_data|
-          file_data['io'] = base64_to_file(file_data)
           if attr_settings[:use_filename]
             file_data['key'] = filename_for(file_data['filename'])
             file_data['filename'] = file_data['key']
@@ -51,9 +57,22 @@ module ActivestorageDelayed
       end
     end
 
-    def base64_to_file(file_data)
-      io = StringIO.new(Base64.decode64(file_data['io']))
-      apply_variant(io, attr_settings[:variant_info]) { |io2| return io2 }
+    def parse_file_io(file_data, &block)
+      tempfile = Tempfile.new(file_data['filename'], binmode: true)
+      tempfile.write Base64.decode64(file_data['io'])
+      tempfile.rewind
+      transform_variation(tempfile, attr_settings[:variant_info]) do |io|
+        block.call(io)
+        tempfile.close
+      end
+    end
+
+    # @param io [StringIO, File]
+    # @param variant_info [Hash, Nil] ActiveStorage variant info. Sample: { resize_to_fit: [400, 400], convert: 'jpg' }
+    def transform_variation(io, variant_info, &block)
+      return block.call(io) unless variant_info
+
+      ActiveStorage::Variation.wrap(variant_info).transform(io, &block)
     end
 
     def model
@@ -83,14 +102,6 @@ module ActivestorageDelayed
 
     def attr_settings
       model.class.instance_variable_get(:@ast_delayed_settings)[attr_name]
-    end
-
-    # @param io [StringIO, File]
-    # @param variant_info [Hash, Nil] ActiveStorage variant info. Sample: { resize_to_fit: [400, 400], convert: 'jpg' }
-    def apply_variant(io, variant_info, &block)
-      return block.call(io) unless variant_info
-
-      ActiveStorage::Variation.wrap(variant_info).transform(io, &block)
     end
   end
 end

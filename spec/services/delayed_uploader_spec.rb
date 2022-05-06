@@ -17,7 +17,7 @@ describe ActivestorageDelayed::DelayedUploader do
 
     describe 'when uploading defined files' do
       it 'decodes base64 encoded file into Tempfile' do
-        expect(inst).to receive(:base64_to_file).with(hash_including('io')).and_call_original
+        expect(Base64).to receive(:decode64).with(file_data['io']).and_call_original
         inst.call
       end
 
