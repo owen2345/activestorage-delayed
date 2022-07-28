@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    activestorage-delayed (0.2.0.pre.pre)
+    activestorage-delayed (0.2.0)
       activestorage
       rails
 
