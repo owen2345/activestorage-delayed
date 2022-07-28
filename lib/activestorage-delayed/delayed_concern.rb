@@ -40,11 +40,16 @@ module ActivestorageDelayed
           "#{send(:id)}-#{name}#{File.extname(filename)}"
         end
 
-        define_method "#{attr_name}_after_upload" do
+        # @param _file_data [Hash<'filename'>]
+        define_method "#{attr_name}_after_upload" do |_file_data|
+        end
+
+        define_method "#{attr_name}_after_upload_all" do
         end
 
         # @param _error (Exception)
-        define_method "#{attr_name}_error_upload" do |_error|
+        # @param _file_data [Hash<'filename'>]
+        define_method "#{attr_name}_error_upload" do |_error, _file_data|
         end
       end
     end

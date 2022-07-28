@@ -22,7 +22,7 @@ describe ActivestorageDelayed::DelayedUploader do
       end
 
       it 'calculates filename if configured as: "use_filename: true"' do
-        expect(inst).to receive(:filename_for)
+        expect(inst).to receive(:filename_for).and_call_original
         inst.call
       end
 
@@ -46,18 +46,6 @@ describe ActivestorageDelayed::DelayedUploader do
         expect { delayed_upload.reload }.to raise_error(ActiveRecord::RecordNotFound)
       end
 
-      it 'calls model#<attr>_after_upload method once failed' do
-        error = 'some error'
-        allow(user.photo).to receive(:attach).and_raise(error)
-        expect(user).to receive(:photo_error_upload).with(be_a(Exception))
-        inst.call
-      end
-
-      it 'calls model#<attr>_after_upload method once uploaded' do
-        expect(user).to receive(:photo_after_upload)
-        inst.call
-      end
-
       describe 'when applying variant transformations to the file to be uploaded' do
         it 'applies variant transformation if defined' do
           variant_info = { resize_to_fit: [400, 400], convert: 'jpg' }
@@ -79,7 +67,6 @@ describe ActivestorageDelayed::DelayedUploader do
     let(:user) { perform_enqueued_jobs { create(:user, :with_certificates_tmp, qty_certs: 2) } }
     let(:delayed_upload) { user.certificates_delayed_uploads.last }
     let(:inst) { described_class.new(delayed_upload) }
-    let(:file_data) { JSON.parse(delayed_upload.files).first }
 
     describe 'when destroying uploads' do
       it 'removes all uploads with the provided ids' do
@@ -97,11 +84,34 @@ describe ActivestorageDelayed::DelayedUploader do
     end
 
     describe 'when uploading defined files' do
-      it 'uploads the files to the storage' do
-        files = 2.times.map { FixtureHelpers.as_uploadable_file('baloon.jpg') }
+      let(:files) { 2.times.map { FixtureHelpers.as_uploadable_file('baloon.jpg') } }
+      before do
         user.update!(certificates_tmp: { files: files })
+      end
+
+      it 'uploads the files to the storage' do
         expect(user.certificates).to receive(:attach).with(hash_including(:filename, :io, :content_type)).twice
         inst.call
+      end
+
+      describe 'when calling callbacks' do
+        let(:file_data_format) { hash_including('filename' => anything) }
+
+        it 'calls model#<attr>_error_upload method when failed uploading a file' do
+          allow(user.certificates).to receive(:attach).and_raise('some error')
+          expect(user).to receive(:certificates_error_upload).with(be_a(Exception), file_data_format).twice
+          inst.call
+        end
+
+        it 'calls model#<attr>_after_upload method once uploaded a file' do
+          expect(user).to receive(:certificates_after_upload).with(file_data_format).twice
+          inst.call
+        end
+
+        it 'calls model#<attr>_after_upload_all method once uploaded all files' do
+          expect(user).to receive(:certificates_after_upload_all).once
+          inst.call
+        end
       end
     end
   end

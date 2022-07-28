@@ -105,8 +105,10 @@ end
 - Capture event when file upload has failed: `<attr_name>_error_upload`
   ```ruby
     class User < ApplicationRecord
-      def photo_error_upload(error)
-        puts "Failed with #{error}"
+      # @param error [StandardError]
+      # @param file_data [Hash<'filename'>]
+      def photo_error_upload(error, file_data)
+        puts "Failed uploading photo #{file_data['filename']}: #{error.message}"
       end
     end
   ```
@@ -114,8 +116,13 @@ end
 - Capture event when file has been uploaded: `<attr_name>_after_upload`
   ```ruby
     class User < ApplicationRecord
-      def photo_after_upload
-        puts "Photo has been uploaded"
+      # @param file_data [Hash<'filename'>]
+      def photo_after_upload(file_data)
+        puts "Photo #{file_data['filename']} has been uploaded"
+      end
+  
+      def photo_after_upload_all
+        puts "All photos have been uploaded"
       end
     end
   ```

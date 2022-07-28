@@ -13,30 +13,31 @@ module ActivestorageDelayed
       return unless delayed_upload
 
       remove_files
-      save_changes if upload_photos
+      upload_photos
+      save_changes
     end
 
     private
 
     def upload_photos
       tmp_files_data.each(&method(:upload_photo))
-      model.send("#{attr_name}_after_upload")
-      true
-    rescue => e # rubocop:disable Style/RescueStandardError
-      print_failure(e)
-      false
+      model.send("#{attr_name}_after_upload_all")
     end
 
     def upload_photo(file_data)
       parse_file_io(file_data) do |io|
         file_data['io'] = io
         model.send(attr_name).attach(file_data.transform_keys(&:to_sym))
+        model.send("#{attr_name}_after_upload", file_data)
+      rescue => e # rubocop:disable Style/RescueStandardError
+        print_failure(e, file_data)
       end
     end
 
-    def print_failure(error)
-      Rails.logger.error("***#{self.class.name} -> Failed uploading files: #{error.message}. #{error.backtrace[0..20]}")
-      model.send("#{attr_name}_error_upload", error)
+    def print_failure(error, file_data = {})
+      details = "#{error.message}. #{error.backtrace[0..20]}"
+      Rails.logger.error("***#{self.class.name} -> Failed uploading file (#{file_data['filename']}): #{details}")
+      model.send("#{attr_name}_error_upload", error, file_data)
     end
 
     def save_changes
@@ -44,7 +45,7 @@ module ActivestorageDelayed
       delayed_upload.destroy!
     end
 
-    # @return [Array<Hash<io: StringIO, filename: String, content_type: String>]
+    # @return [Array<Hash<io: StringIO, filename: String, content_type: String>>]
     def tmp_files_data
       @tmp_files_data ||= begin
         files = JSON.parse(delayed_upload.files || '[]')
