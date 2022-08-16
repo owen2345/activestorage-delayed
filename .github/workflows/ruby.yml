@@ -13,4 +13,4 @@ jobs:
       prepare_db_cmd: null
       copy_env: false
       run_rubocop: true
-      rspec_cmd: 'bundle install and bundle exec rspec'
+      rspec_cmd: 'bundle install && bundle exec rspec'
