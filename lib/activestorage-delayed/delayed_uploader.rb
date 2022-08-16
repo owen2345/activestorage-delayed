@@ -21,7 +21,6 @@ module ActivestorageDelayed
 
     def upload_photos
       tmp_files_data.each(&method(:upload_photo))
-      model.send("#{attr_name}_after_upload_all")
     end
 
     def upload_photo(file_data)
@@ -43,6 +42,7 @@ module ActivestorageDelayed
     def save_changes
       model.save!
       delayed_upload.destroy!
+      model.send("#{attr_name}_after_upload_all")
     end
 
     # @return [Array<Hash<io: StringIO, filename: String, content_type: String>>]
