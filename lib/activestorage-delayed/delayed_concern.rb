@@ -37,7 +37,7 @@ module ActivestorageDelayed
           name = File.basename(filename, '.*').parameterize
           is_multiple = send(attr_name).class.name.include?('Many')
           name = "#{SecureRandom.uuid}-#{name}" if is_multiple
-          "#{send(:id)}-#{name}#{File.extname(filename)}"
+          "#{send(:id)}-#{name}-#{Time.current.to_i}#{File.extname(filename)}"
         end
 
         # @param _file_data [Hash<'filename'>]
