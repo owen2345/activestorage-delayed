@@ -28,14 +28,15 @@ module ActivestorageDelayed
         file_data['io'] = io
         model.send(attr_name).attach(file_data.transform_keys(&:to_sym))
         model.send("#{attr_name}_after_upload", file_data)
-      rescue => e # rubocop:disable Style/RescueStandardError
-        print_failure(e, file_data)
       end
+    rescue => e # rubocop:disable Style/RescueStandardError
+      print_failure(e, file_data)
     end
 
     def print_failure(error, file_data = {})
       details = "#{error.message}. #{error.backtrace[0..20]}"
-      Rails.logger.error("***#{self.class.name} -> Failed uploading file (#{file_data['filename']}): #{details}")
+      key = "#{delayed_upload.id}-#{file_data['filename']}"
+      Rails.logger.error("***#{self.class.name} -> Failed uploading file (#{key}): #{details}")
       model.send("#{attr_name}_error_upload", error, file_data)
     end
 
