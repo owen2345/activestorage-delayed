@@ -13,24 +13,25 @@ module ActivestorageDelayed
       return unless delayed_upload
 
       remove_files
-      upload_photos
-      save_changes
+      save_changes if upload_photos
     end
 
     private
 
     def upload_photos
-      tmp_files_data.each(&method(:upload_photo))
+      tmp_files_data.map(&method(:upload_photo)).all?
     end
 
     def upload_photo(file_data)
       parse_file_io(file_data) do |io|
         file_data['io'] = io
+        remove_duplicated_object(file_data['key']) if file_data['key']
         model.send(attr_name).attach(file_data.transform_keys(&:to_sym))
         model.send("#{attr_name}_after_upload", file_data)
       end
+      true
     rescue => e # rubocop:disable Style/RescueStandardError
-      print_failure(e, file_data)
+      print_failure(e, file_data) && false
     end
 
     def print_failure(error, file_data = {})
@@ -72,9 +73,11 @@ module ActivestorageDelayed
     # @param io [StringIO, File]
     # @param variant_info [Hash, Nil] ActiveStorage variant info. Sample: { resize_to_fit: [400, 400], convert: 'jpg' }
     def transform_variation(io, variant_info, &block)
-      return block.call(io) unless variant_info
+      variant_info ? ActiveStorage::Variation.wrap(variant_info).transform(io, &block) : block.call(io)
+    end
 
-      ActiveStorage::Variation.wrap(variant_info).transform(io, &block)
+    def remove_duplicated_object(key)
+      ActiveStorage::Blob.where(key: key).take&.destroy!
     end
 
     def model

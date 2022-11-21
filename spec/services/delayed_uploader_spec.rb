@@ -46,6 +46,16 @@ describe ActivestorageDelayed::DelayedUploader do
         expect { delayed_upload.reload }.to raise_error(ActiveRecord::RecordNotFound)
       end
 
+      it 'removes the duplicated object key' do
+        user.instance_eval do
+          def photo_filename(_)
+            'custom_key'
+          end
+        end
+        expect(inst).to receive(:remove_duplicated_object).with('custom_key')
+        inst.call
+      end
+
       describe 'when applying variant transformations to the file to be uploaded' do
         it 'applies variant transformation if defined' do
           variant_info = { resize_to_fit: [400, 400], convert: 'jpg' }
@@ -110,6 +120,12 @@ describe ActivestorageDelayed::DelayedUploader do
 
         it 'calls model#<attr>_after_upload_all method once uploaded all files' do
           expect(user).to receive(:certificates_after_upload_all).once
+          inst.call
+        end
+
+        it 'does not call _after_upload_all if failed uploading a file' do
+          allow(user.certificates).to receive(:attach).and_raise('some error')
+          expect(user).not_to receive(:certificates_after_upload_all)
           inst.call
         end
       end
