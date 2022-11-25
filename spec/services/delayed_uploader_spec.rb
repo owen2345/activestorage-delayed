@@ -46,14 +46,9 @@ describe ActivestorageDelayed::DelayedUploader do
         expect { delayed_upload.reload }.to raise_error(ActiveRecord::RecordNotFound)
       end
 
-      it 'removes the duplicated object key' do
-        user.instance_eval do
-          def photo_filename(_)
-            'custom_key'
-          end
-        end
-        expect(inst).to receive(:remove_duplicated_object).with('custom_key')
-        inst.call
+      it 'raises the exception error when UniqueViolation error' do
+        expect(user.photo).to receive(:attach).and_raise('PG::UniqueViolation: ...')
+        expect { inst.call }.to raise_error
       end
 
       describe 'when applying variant transformations to the file to be uploaded' do
