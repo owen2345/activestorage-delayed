@@ -41,11 +41,9 @@ module ActivestorageDelayed
     end
 
     def save_changes
-      model.transaction do
-        model.save!
-        delayed_upload.destroy!
-        model.send("#{attr_name}_after_upload_all")
-      end
+      model.save!
+      delayed_upload.destroy!
+      model.send("#{attr_name}_after_upload_all")
     end
 
     # @return [Array<Hash<io: StringIO, filename: String, content_type: String>>]
